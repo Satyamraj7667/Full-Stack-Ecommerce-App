@@ -1,0 +1,39 @@
+server:
+  port: 8083
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+       dialect: org.hibernate.dialect.MySQLDialect          
+  
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: satyam
+    url: jdbc:mysql://localhost:3306/ecommerce
+    
+  application:
+    name: ORDER_SERVICE
+    
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultzone: http://localhost:8761/eureka
+  
+  instance:
+    prefer-ip-address: true 
+    
+rzp_key_id : rzp_test_4HPMaP72AZy6ih
+rzp_key_secret : gZVcAuvRacnhm5492kxxd56A
+rzp_currency : INR
+
+    
+
+ 

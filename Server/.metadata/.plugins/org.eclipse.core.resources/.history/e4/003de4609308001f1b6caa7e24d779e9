@@ -1,0 +1,99 @@
+package com.orders.Controller;
+
+import java.util.List;
+import java.util.UUID;
+
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.orders.Model.Order;
+import com.orders.Model.PaymentLinkResponse;
+import com.orders.Service.OrderService;
+import com.razorpay.PaymentLink;
+import com.razorpay.RazorpayClient;
+
+@RestController
+@RequestMapping("/order")
+public class OrderController {
+
+	@Autowired
+	private OrderService orderserv;
+	
+	@Value("{razorpay.api.key}")
+	String apikey;
+	
+	@Value("{razorpay.api.secret}")
+	String apisecret;
+	
+	
+	public ResponseEntity<PaymentLinkResponse> createPaymentLink(@PathVariable UUID orderId){
+		Order order = orderserv.getOrderById(orderId);
+		
+		try {
+			RazorpayClient razor = new RazorpayClient(apikey, apisecret);
+			JSONObject paymentLinkRequest = new JSONObject();
+			paymentLinkRequest.put("amount", order.getTotalAmount()*100);
+			paymentLinkRequest.put("currency", "INR");
+			paymentLinkRequest.put("userid", order.getUserId());
+			
+			
+			JSONObject customer = new JSONObject();
+			customer.put("userid", order.getUserId());
+			
+			JSONObject notify = new JSONObject();
+			notify.put("sms", true);
+			notify.put("email", true);
+			paymentLinkRequest.put("notify", notify);
+			paymentLinkRequest.put("callback_url","http://localhost:3000/user/paymentSuccess/"+order.getId());
+			paymentLinkRequest.put("callback_method", "get");
+			
+			PaymentLink payment = razor.paymentLink.create(paymentLinkRequest);
+			String paymentLinkId = payment.get("id");
+			String paymentLinkUrl = payment.get("short_url");
+			
+			PaymentLinkResponse res = new PaymentLinkResponse();
+			res.setPayment_link_id(paymentLinkId);
+			res.setPayment_link_url(paymentLinkUrl);
+			
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+	
+	
+	
+	@GetMapping("/user/{userId}")
+	public ResponseEntity<List<Order>> getOrdersOfSingleUser(@PathVariable("UserId") Long userId){
+		List<Order> l = orderserv.getOrdersByUserId(userId);
+		return ResponseEntity.ok(l);
+	}
+	
+	@GetMapping("/{orderId}")
+	public ResponseEntity<Order> getSingleOrderById(@PathVariable("orderId") UUID OrderId){
+		Order or = orderserv.getOrderById(OrderId);
+		return ResponseEntity.ok(or);
+	}
+	
+	@PostMapping
+	public ResponseEntity<String> PlaceOrder(@RequestBody Order or){
+		orderserv.saveOrder(or);
+		return ResponseEntity.ok("Order placed Successfully");
+	}
+	
+	@DeleteMapping("/{orderId}")
+	public ResponseEntity<String> DeleteOrder(@PathVariable("orderId") UUID orderID){
+        orderserv.deleteOrderById(orderID);
+        return ResponseEntity.ok("Deleted Successfully");
+	}
+	
+}

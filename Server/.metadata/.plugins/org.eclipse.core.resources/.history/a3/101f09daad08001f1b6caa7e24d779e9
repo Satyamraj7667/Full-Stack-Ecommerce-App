@@ -1,0 +1,16 @@
+package com.orders.Service;
+
+import java.util.List;
+import java.util.UUID;
+
+import com.orders.Model.Orders;
+
+public interface OrderService {
+
+	List<Orders> getOrdersByUserId(Long userId);
+	Orders getOrderById(UUID orderId);
+	void saveOrder(Orders order);
+	void deleteOrderById(UUID Id);
+	
+	
+}

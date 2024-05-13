@@ -1,0 +1,41 @@
+server:
+  port: 8081
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+       dialect: org.hibernate.dialect.MySQLDialect
+       
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+      file-size-threshold: 1KB
+                
+  
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: satyam
+    url: jdbc:mysql://localhost:3306/ecommerce
+    
+  application:
+    name: PRODUCT-SERVICE
+    
+project:
+  image : images/
+        
+    
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultzone: http://localhost:8761/eureka
+  
+  instance:
+    prefer-ip-address: true 
